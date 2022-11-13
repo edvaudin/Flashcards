@@ -33,5 +33,40 @@ namespace Flashcards
                 Console.Write("\nThis is not a valid id, please enter a number or to return to main menu type '-1': ");
             }
         }
+        internal static int GetFlashcardId(int stackId)
+        {
+            while (true)
+            {
+                if (Int32.TryParse(Console.ReadLine(), out int result))
+                {
+                    if (Validator.IsValidFlashcardId(result, stackId) || result == -1)
+                    {
+                        return result;
+                    }
+                }
+                Console.Write("\nThis is not a valid id, please enter a number or to return to main menu type '-1': ");
+            }
+        }
+
+        public static string ChooseStackOrFlashcard()
+        {
+            string input = Console.ReadLine();
+            while (!Validator.IsStackOrFlashcard(input))
+            {
+                Console.Write("\nThis is not a valid input. Please enter one of the above options: ");
+                input = Console.ReadLine();
+            }
+            return input;
+        }
+
+        public static string GetDbFriendlyString()
+        {
+            string input = Console.ReadLine();
+            while (String.IsNullOrEmpty(input) || input.Length > 255)
+            {
+                Console.WriteLine("\nInput cannot be empty or more than 255 characters");
+            }
+            return input;
+        }
     }
 }
