@@ -15,8 +15,13 @@ namespace Flashcards.Models
         public Stack() { }
         public Stack(SqlDataReader reader)
         {
-            id = reader.GetInt16(reader.GetOrdinal("id"));
+            id = reader.GetInt32(reader.GetOrdinal("id"));
             name = reader.GetString(reader.GetOrdinal("name"));
+        }
+
+        public override string ToString()
+        {
+            return $"[#{id}] {name}";
         }
     }
 }

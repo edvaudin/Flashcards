@@ -18,8 +18,8 @@ namespace Flashcards.Models
 
         public Study(SqlDataReader reader)
         {
-            id = reader.GetInt16(reader.GetOrdinal("id"));
-            stackId = reader.GetInt16(reader.GetOrdinal("stack_id"));
+            id = reader.GetInt32(reader.GetOrdinal("id"));
+            stackId = reader.GetInt32(reader.GetOrdinal("stack_id"));
             date = reader.GetDateTime(reader.GetOrdinal("date"));
             score = reader.GetFloat(reader.GetOrdinal("score"));
         }
