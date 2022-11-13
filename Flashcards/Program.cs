@@ -62,25 +62,25 @@ namespace Flashcards
             string option = UserInput.ChooseStackOrFlashcard();
             if (option == "s")
             {
-                ViewStacks();
-                Console.WriteLine("Which stack do you want to delete? (Type its ID)");
-                int id = UserInput.GetStackId();
-                if (id == -1) { return; }
-                dal.DeleteStack(id);
-                Console.WriteLine($"\nSuccessfully deleted stack #{id}.");
+                List<FlashcardStack> stacks = ViewStacks();
+                Console.WriteLine("Which stack do you want to delete?");
+                int index = UserInput.GetIndex(stacks) - 1;
+                if (index == -1) { return; }
+                dal.DeleteStack(stacks[index].id);
+                Console.WriteLine($"\nSuccessfully deleted stack #{index}.");
             }
             else if (option == "f")
             {
-                ViewStacks();
+                List<FlashcardStack> stacks = ViewStacks();
                 Console.WriteLine("Which stack do you want to delete a flashcard from?");
-                int stackId = UserInput.GetStackId();
-                if (stackId == -1) { return; }
-                Console.WriteLine("Which flashcard do you want to delete? (Type its ID)");
-                ViewFlashcards(stackId);
-                int flashcardId = UserInput.GetFlashcardId(stackId);
-                if (flashcardId == -1) { return; }
-                dal.DeleteFlashcard(flashcardId, stackId);
-                Console.WriteLine($"\nSuccessfully deleted a flashcard from the {dal.GetStackById(stackId).name} stack.");
+                int index = UserInput.GetIndex(stacks) - 1;
+                if (index == -1) { return; }
+                Console.WriteLine("Which flashcard do you want to delete?");
+                List<Flashcard> flashcards = ViewFlashcards(stacks[index].id);
+                int flashcardIndex = UserInput.GetIndex(flashcards) - 1;
+                if (flashcardIndex == -1) { return; }
+                dal.DeleteFlashcard(flashcards[flashcardIndex].id, stacks[index].id);
+                Console.WriteLine($"\nSuccessfully deleted a flashcard from the {dal.GetStackById(stacks[index].id).name} stack.");
             }
         }
 
@@ -97,16 +97,16 @@ namespace Flashcards
             }
             else if (option == "f")
             {
-                ViewStacks();
+                List<FlashcardStack> stacks = ViewStacks();
                 Console.WriteLine("Which stack do you want to add a flashcard to?");
-                int id = UserInput.GetStackId();
-                if (id == -1) { return; }
+                int index = UserInput.GetIndex(stacks) - 1;
+                if (index == -1) { return; }
                 Console.WriteLine("What will be the prompt/question on the flashcard?");
                 string prompt = UserInput.GetDbFriendlyString();
                 Console.WriteLine("What will be the answer on the flashcard?");
                 string answer = UserInput.GetDbFriendlyString();
-                dal.AddFlashcard(id, prompt, answer);
-                Console.WriteLine($"\nSuccessfully created a new flashcard in the {dal.GetStackById(id).name} stack.");
+                dal.AddFlashcard(stacks[index].id, prompt, answer);
+                Console.WriteLine($"\nSuccessfully created a new flashcard in the {dal.GetStackById(stacks[index].id).name} stack.");
             }
         }
 
@@ -117,11 +117,11 @@ namespace Flashcards
 
         private static void Study()
         {
-            ViewStacks();
+            List<FlashcardStack> stacks = ViewStacks();
             Console.WriteLine("Which stack would you like to revise?");
-            int id = UserInput.GetStackId();
-            if (id == -1) { return; }
-            List<Flashcard> flashcards = dal.GetFlashcardsInStack(id);
+            int index = UserInput.GetIndex(stacks) - 1;
+            if (index == -1) { return; }
+            List<Flashcard> flashcards = dal.GetFlashcardsInStack(stacks[index].id);
             if (flashcards.Count == 0)
             {
                 Console.WriteLine("This stack does not contain any flashcards yet! Try adding some from the menu.");
@@ -153,26 +153,28 @@ namespace Flashcards
 
         private static float GetScorePercentage(int score, int maximum) => ((float)score / (float)maximum) * 100;
 
-        private static void ViewStacks()
+        private static List<FlashcardStack> ViewStacks()
         {
             List<FlashcardStack> stacks = dal.GetStacks();
             var tableData = new List<List<object>>();
             foreach (FlashcardStack stack in stacks)
             {
-                tableData.Add(new List<object> { stack.id, stack.name });
+                tableData.Add(new List<object> { stacks.IndexOf(stack) + 1, stack.name });
             }
             ConsoleTableBuilder.From(tableData).WithTitle("Your Stacks").WithColumn("Id", "Name").ExportAndWriteLine();
+            return stacks;
         }
 
-        private static void ViewFlashcards(int stackId)
+        private static List<Flashcard> ViewFlashcards(int stackId)
         {
             List<Flashcard> flashcards = dal.GetFlashcardsInStack(stackId);
             var tableData = new List<List<object>>();
             foreach (Flashcard flashcard in flashcards)
             {
-                tableData.Add(new List<object> { flashcard.id, flashcard.prompt, flashcard.answer });
+                tableData.Add(new List<object> { flashcards.IndexOf(flashcard) + 1, flashcard.prompt, flashcard.answer });
             }
             ConsoleTableBuilder.From(tableData).WithTitle($"Flashcards in {dal.GetStackById(flashcards[0].stackId).name}").WithColumn("Id", "Prompt", "Answer").ExportAndWriteLine();
+            return flashcards;
         }
     }
 }

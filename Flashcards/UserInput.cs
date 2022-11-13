@@ -19,13 +19,13 @@ namespace Flashcards
             return input;
         }
 
-        internal static int GetStackId()
+        internal static int GetIndex<T>(List<T> list)
         {
             while (true)
             {
                 if (Int32.TryParse(Console.ReadLine(), out int result))
                 {
-                    if (Validator.IsValidStackId(result) || result == -1)
+                    if ((result >= 0 && result <= list.Count) || result == -1)
                     {
                         return result;
                     }
